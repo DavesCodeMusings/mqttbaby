@@ -1,5 +1,7 @@
 # MQTT Baby
-This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows the board to connect to WiFi and publish messages to an MQTT server on the local network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be stored in non-volitile memory. Writing the sketch to an 8266 microcontroller will create a system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
+This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows the board to connect to WiFi and publish messages to an MQTT server on the local network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be entered and stored in non-volitile memory.
+
+Writing the sketch to an 8266 microcontroller will create a basic system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
 
 ## How to use it
 You'll first want to be familiar with using the Arduino IDE for ESP2866 devices. There are several internet tutorials on this topic along with the [official project](https://github.com/esp8266/Arduino) to get you going. You'll also need an MQTT server and a home automation system to integrate with. My [CloudPi](https://github.com/DavesCodeMusings/CloudPi) project may be helpful if you don't have MQTT or home automation installed yet.
@@ -16,9 +18,9 @@ Once you have the prerequisites out of the way, here are the steps to get starte
 If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
 
 ## Why?
-I wanted a way to collect outdoor temperature and humidity data for my Home Assistant home automation installation. There's a cute little Xaiomi Mijia device that does this very nicely when paired with ESPHome, but it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C.
+I wanted a way to collect outdoor temperature and humidity data for my Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on my back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C.
 
-Generic 8266 microcontrollers, like NodeMCU and D1 clones, are incredibly cheap and well documented when it comes to interfacing with environmental sensors.  I also wanted something more DIY than ESPHome, but more polished than a custom sketch. So I created MQTT Baby.
+I also wanted something more DIY than ESPHome, but more polished than a custom sketch. So I created MQTT Baby. Generic 8266 microcontrollers, like NodeMCU and D1 clones, are incredibly cheap and well documented when it comes to interfacing with environmental sensors. This sketch take the hard work out of the WiFi and MQTT tasks, creating a base on which to build al sorts of remote sensors.
 
 ## What does it do?
 A lot of the work that went into MQTT Baby was to create a semi-friendly menu-based setup utility for gathering network parameters and saving them to non-volitile memory. Restarting after flashing the sketch will enter the configuration utility. The utility is also accessible by pressing a key within the first 10 seconds of start-up.
@@ -38,6 +40,6 @@ Tinkering with microcontrollers can be a great learning experience. Things you c
 * How to read and save binary data to files.
 
 ## Next Steps
-My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure. Deep sleep capability for battery-powered devices is also something I'm considering. And, if I can figure out how to echo characters when using Serial.readStringUntil(), I will add that feature.
+My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure devices. DS18B20 or simple termistor probes are also on my to-do list for monitoring the basement freezer temperature. Deep sleep capability for battery-powered devices is something I'm considering to avoid having to use a USB poer supply outdoors. And, if I can figure out how to echo characters when using Serial.readStringUntil(), I will definitely add that feature.
 
 I probably will not be adding any capability for receiving MQTT messages, outputting to a display, JSON / YAML config files, or over the air (OTA) updates.
