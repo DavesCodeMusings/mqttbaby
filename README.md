@@ -1,5 +1,5 @@
 # MQTT Baby
-This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows the board to connect to WiFi and publish messages to an MQTT server on the local network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be entered and stored in non-volitile memory.
+This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows NodeMCU and D1 (and possibly other) boards to connect to WiFi and publish messages to an MQTT server on the local network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be entered and stored in non-volitile memory.
 
 Writing the sketch to an 8266 microcontroller will create a basic system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
 
@@ -18,9 +18,9 @@ Once you have the prerequisites out of the way, here are the steps to get starte
 If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
 
 ## Why?
-I wanted a way to collect outdoor temperature and humidity data for my Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on my back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C.
+I wanted a way to collect outdoor temperature and humidity data for our Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on my back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C and are a better option for the winter months.
 
-I also wanted something more DIY than ESPHome, but more polished than a custom sketch. So I created MQTT Baby. Generic 8266 microcontrollers, like NodeMCU and D1 clones, are incredibly cheap and well documented when it comes to interfacing with environmental sensors. This sketch take the hard work out of the WiFi and MQTT tasks, creating a base on which to build al sorts of remote sensors.
+I also wanted something more DIY than ESPHome, but more polished than a custom sketch. So I created MQTT Baby. Generic 8266 microcontrollers, like NodeMCU and D1 clones, are incredibly cheap and well documented when it comes to interfacing with environmental sensors. This sketch take the hard work out of the WiFi and MQTT tasks, creating a base on which to build all sorts of remote sensors.
 
 ## What does it do?
 A lot of the work that went into MQTT Baby was to create a semi-friendly menu-based setup utility for gathering network parameters and saving them to non-volitile memory. Restarting after flashing the sketch will enter the configuration utility. The utility is also accessible by pressing a key within the first 10 seconds of start-up.
