@@ -38,6 +38,6 @@ Tinkering with microcontrollers can be a great learning experience. Things you c
 * How to read and save binary data to files.
 
 ## Next Steps
-My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure. Deep sleep capability for battery-powered devices is also something I'm considering. Also, if I can figure out how to echo characters when using Serial.readStringUntil(), I will add that feature.
+My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure. Deep sleep capability for battery-powered devices is also something I'm considering. And, if I can figure out how to echo characters when using Serial.readStringUntil(), I will add that feature.
 
 I probably will not be adding any capability for receiving MQTT messages, outputting to a display, JSON / YAML config files, or over the air (OTA) updates.
