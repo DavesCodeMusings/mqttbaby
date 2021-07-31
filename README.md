@@ -2,7 +2,18 @@
 This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows the board to connect to WiFi and publish messages to an MQTT server on the network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be stored in non-volitile memory. Writing the sketch to an 8266 microcontroller will create a system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
 
 ## How to use it
+You'll first want to be familiar with using the Arduino IDE for ESP2866 devices. There are several internet tutorials on this topic along with the [official project](https://github.com/esp8266/Arduino) to get you going. You'll also need an MQTT server and a home automation system to integrate with. My [CloudPi](https://github.com/DavesCodeMusings/CloudPi) project may be helpful if you don't have MQTT or home automation installed yet.
 
+Once you have the prerequisites out of the way, here are the steps to get started.
+1. Use the Arduino IDE to flash the mqttbaby.ino sketch.
+2. Set up PuTTY or another serial program to attach to your ESP8266's COM port at 9600bps, 8 bits, one stop bit, no parity.
+3. Turn on Local Echo for the serial connection, otherwise you won't see what you're typing.
+4. Reset the 8266.
+5. On first boot, the device will enter the setup menu. Enter the parameters for your network.
+6. Save the parameters and verify the device can find your WiFi and MQTT server.
+7. Further verify by using Home Assistant's MQTT integration utility to listen to the MQTT topic being sent. (The 8266 serial debug output will show the topic and message.)
+
+If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
 
 ## Why?
 I wanted a way to collect outdoor temperature and humidity data for my Home Assistant home automation installation. There's a cute little Xaiomi Mijia device that does this very nicely when paired with ESPHome, but it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C.
@@ -27,6 +38,6 @@ Tinkering with microcontrollers can be a great learning experience. Things you c
 * How to read and save binary data to files.
 
 ## Next Steps
-My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure. Deep sleep capability for battery-powered devices is also something I'm considering.
+My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure. Deep sleep capability for battery-powered devices is also something I'm considering. Also, if I can figure out how to echo characters when using Serial.readStringUntil(), I will add that feature.
 
-I probably will not be adding any capability for receiving MQTT messages, outputting to a display, or over the air (OTA) updates.
+I probably will not be adding any capability for receiving MQTT messages, outputting to a display, JSON / YAML config files, or over the air (OTA) updates.
