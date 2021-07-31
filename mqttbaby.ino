@@ -4,11 +4,19 @@
 #include <FS.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <DHT.h>
 
 #define CONFIG_FILE "device.cfg"
-#define UPDATE_INTERVAL 120000
-#define SERIAL_BPS 9600
-#define WIFI_TIMEOUT 30
+#define SERIAL_BPS 9600  // for debug info
+#define UPDATE_INTERVAL 120  // in seconds
+#define WIFI_TIMEOUT 30  // in seconds
+
+// Sensors and their configuration
+#define MQTT_PING true
+#define HAVE_DHT false
+#define DHT_TYPE DHT22  // can be DHT22 or DHT11
+#define DHT_PIN 14  // GPIO number; not the D number on the board!
+#define DHT_FAHRENHEIT true
 
 typedef struct {
   char deviceID[16];
@@ -23,6 +31,43 @@ typedef struct {
 DeviceConfig config;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
+
+// Sensor functions -- These can be used inside the loop() function to gather data.
+
+
+/**
+ * A fake sensor that can be used to verify connectivity when no sensors are configured.
+ * Sends 'Ping.' to MQTT topic device_name/system.
+ */
+void publishPing() {
+  publish("system", "Ping.");
+}
+
+/**
+ * Read temperature and humidity from DHT22 and publish to MQTT topics device_name/temperature and device_name/humidity.
+ * More information about the DHT22 sensor library is available from https://github.com/adafruit/DHT-sensor-library
+ * Sends temperature, humidity, and heatindex to topics device_name/temperature, device_name/humidity, and device_name/heatindex.
+ */
+void publishDHT() {
+  DHT dht(DHT_PIN, DHT_TYPE);
+  char buffer[16];  // Used temporarily to convert floating point readings to strings.
+  
+  Serial.println("Reading DHT sensor data.");
+  dht.begin();
+  delay(2000);  // Wait for sensor to gather data.
+
+  float temperature = dht.readTemperature(DHT_FAHRENHEIT);
+  snprintf(buffer, sizeof buffer, "%3.2f", temperature);
+  publish("temperature", buffer);
+
+  float humidity = dht.readHumidity();
+  snprintf(buffer, sizeof buffer, "%3.2f", humidity);
+  publish("humidity", buffer);
+
+  float heatindex = dht.computeHeatIndex(temperature, humidity, DHT_FAHRENHEIT);
+  snprintf(buffer, sizeof buffer, "%3.2f", heatindex);
+  publish("heatindex", buffer);
+}
 
 /**
  * Read device configuration parameters from non-volitile memory filesystem.
@@ -239,6 +284,7 @@ void wifiConnect() {
  * Log into the MQTT server unless there's already a session established.
  */
 void mqttConnect() {
+  wifiConnect();  // No harm if there's already a connection.
   if (!mqtt.connected()) {
     Serial.print("Connecting to MQTT server at ");
     Serial.println(config.mqttIP);
@@ -285,6 +331,8 @@ void mqttConnect() {
  */
 void publish(char* subTopic, char* message) {
   char *topic = (char *) malloc(sizeof config.deviceID + sizeof subTopic + 2);  // +1 for / and +1 for null terminator.
+
+  mqttConnect();
   strcpy(topic, config.deviceID);
   strcat(topic, "/");
   strcat(topic, subTopic);
@@ -344,11 +392,11 @@ void loop() {
   digitalWrite(LED_BUILTIN, LOW);  // Indicates activity.
   SPIFFS.begin();
   readConfig();
-  // TO DO: Take readings from sensors.
-  wifiConnect();
-  mqttConnect();
-  publish("system", "Ping.");
-  // TO DO: Publish sensor readings. 
+  
+  // Take readings from any attached sensors and publish data.
+  if (MQTT_PING) publishPing();
+  if (HAVE_DHT) publishDHT();
+
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(UPDATE_INTERVAL);
+  delay(UPDATE_INTERVAL * 1000);
 }
