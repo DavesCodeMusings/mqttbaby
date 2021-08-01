@@ -40,6 +40,4 @@ Tinkering with microcontrollers can be a great learning experience. Things you c
 * How to read and save binary data to files.
 
 ## Next Steps
-My focus for future enhancements is to create sample functions for reading DHT22 temperature/humidity data and BMP280 barometric pressure devices. DS18B20 or simple termistor probes are also on my to-do list for monitoring the basement freezer temperature. Deep sleep capability for battery-powered devices is something I'm considering to avoid having to use a USB poer supply outdoors. And, if I can figure out how to echo characters when using Serial.readStringUntil(), I will definitely add that feature.
-
-I probably will not be adding any capability for receiving MQTT messages, outputting to a display, JSON / YAML config files, or over the air (OTA) updates.
+See the [MQTT Baby Wiki](https://github.com/DavesCodeMusings/mqttbaby/wiki) for more detailed information. Bugs and enhancements will tracked on the Project Page.
