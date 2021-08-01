@@ -7,12 +7,14 @@
 #include <DHT.h>
 #include <Adafruit_BMP280.h>
 
-
+// Device parameters
 #define CONFIG_FILE "device.cfg"
-#define SERIAL_BPS 9600  // for debug info
-#define WIFI_TIMEOUT 30  // in seconds
+#define CONFIG_DELAY 5  // number of seconds to display "press a key" prompt
+#define WIFI_TIMEOUT 30  // number of seconds to wait for WiFi connection
+#define SERIAL_BPS 9600
+#define WAKE_WIRE true  // Is there a connection from WAKE pin to RST pin for deep sleep?
 
-// Sensors and their configuration
+// Sensor parameters
 #define MQTT_PING false
 #define HAVE_DHT true
 #define DHT_TYPE DHT22  // can be DHT22 or DHT11
@@ -148,7 +150,7 @@ void setConfigDefaults() {
   config.mqttPort = 1883;
   strcpy(config.mqttUser, "mqtt");
   strcpy(config.mqttPass, "password");
-  config.updateInterval = 300;
+  config.updateInterval = 5;  // in munites.
 }
 
 /**
@@ -161,21 +163,21 @@ void inputConfig() {
 
   while (!done) {
     //Show current values.
-    Serial.print("(1) Device ID:        ");
+    Serial.print("(1) Device ID:                  ");
     Serial.println(config.deviceID);
-    Serial.print("(2) WiFi SSID:        ");
+    Serial.print("(2) WiFi SSID:                  ");
     Serial.println(config.wifiSSID);
-    Serial.print("(3) WiFi password:    ");
+    Serial.print("(3) WiFi password:              ");
     Serial.println(config.wifiPass);
-    Serial.print("(4) MQTT IP address:  ");
+    Serial.print("(4) MQTT IP address:            ");
     Serial.println(config.mqttIP);
-    Serial.print("(5) MQTT IP port:     ");
+    Serial.print("(5) MQTT IP port:               ");
     Serial.println(config.mqttPort);
-    Serial.print("(6) MQTT user:        ");
+    Serial.print("(6) MQTT user:                  ");
     Serial.println(config.mqttUser);
-    Serial.print("(7) MQTT password:    ");
+    Serial.print("(7) MQTT password:              ");
     Serial.println(config.mqttPass);
-    Serial.print("(8) Update interval:  ");
+    Serial.print("(8) Update interval (minutes):  ");
     Serial.println(config.updateInterval);
     Serial.println("(0) Save and exit.");
 
@@ -396,7 +398,7 @@ void setup() {
   if (SPIFFS.begin()) {
     if (SPIFFS.exists(CONFIG_FILE)) {
       Serial.print("Press any key to enter setup.");
-      for (int i=0; i<10; i++) {
+      for (int i=0; i<CONFIG_DELAY; i++) {
         if (Serial.available()) {
           while(Serial.available()) {
             Serial.read();  // Clear the keypress(es).
@@ -426,6 +428,7 @@ void setup() {
  * Update sensor data and publish to MQTT.
  */
 void loop() {
+  unsigned long updateStart = millis();
   digitalWrite(LED_BUILTIN, LOW);  // Indicates activity.
   SPIFFS.begin();
   readConfig();
@@ -436,5 +439,9 @@ void loop() {
   if (HAVE_BMP) publishBMP();
 
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(config.updateInterval * 1000);
+
+  // Delay loop compensates for sensor reading and WiFi connection times (and config keypress prompt shown after deep sleep wake-ups.)
+  unsigned long duration = millis() - updateStart;
+  if (WAKE_WIRE) ESP.deepSleep(config.updateInterval * 60e6 - duration * 1000 - CONFIG_DELAY * 1000);  // 60e6 microseconds in one minute.
+  if (!WAKE_WIRE) delay(config.updateInterval * 60e3 - duration);  // 60e3 milliseconds in one minute.
 }
