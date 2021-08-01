@@ -5,7 +5,6 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>
-#include <Wire.h>
 #include <Adafruit_BMP280.h>
 
 
