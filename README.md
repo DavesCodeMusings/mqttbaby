@@ -40,4 +40,4 @@ Tinkering with microcontrollers can be a great learning experience. Things you c
 * How to read and save binary data to files.
 
 ## Next Steps
-See the [MQTT Baby Wiki](https://github.com/DavesCodeMusings/mqttbaby/wiki) for more detailed information. Bugs and enhancements will tracked on the [project page](https://github.com/DavesCodeMusings/mqttbaby/projects/1).
+See the [MQTT Baby wiki](https://github.com/DavesCodeMusings/mqttbaby/wiki) for more detailed information. Bugs and enhancements will tracked on the [project page](https://github.com/DavesCodeMusings/mqttbaby/projects/1).
