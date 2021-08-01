@@ -18,7 +18,7 @@ Once you have the prerequisites out of the way, here are the steps to get starte
 If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
 
 ## Why?
-I wanted a way to collect outdoor temperature and humidity data for our Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on my back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C and are a better option for the winter months.
+I wanted a way to collect outdoor temperature and humidity data for our Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on the back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C and make a better option for the winter months.
 
 I also wanted something more DIY than ESPHome, but more polished than a custom sketch. So I created MQTT Baby. Generic 8266 microcontrollers, like NodeMCU and D1 clones, are incredibly cheap and well documented when it comes to interfacing with environmental sensors. This sketch take the hard work out of the WiFi and MQTT tasks, creating a base on which to build all sorts of remote sensors.
 
