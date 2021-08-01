@@ -5,18 +5,21 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>
+#include <Wire.h>
+#include <Adafruit_BMP280.h>
+
 
 #define CONFIG_FILE "device.cfg"
 #define SERIAL_BPS 9600  // for debug info
-#define UPDATE_INTERVAL 120  // in seconds
 #define WIFI_TIMEOUT 30  // in seconds
 
 // Sensors and their configuration
-#define MQTT_PING true
-#define HAVE_DHT false
+#define MQTT_PING false
+#define HAVE_DHT true
 #define DHT_TYPE DHT22  // can be DHT22 or DHT11
 #define DHT_PIN 14  // GPIO number; not the D number on the board!
-#define DHT_FAHRENHEIT true
+#define HAVE_BMP true
+#define BMP_I2C_ADDR (0x76)
 
 typedef struct {
   char deviceID[16];
@@ -26,6 +29,7 @@ typedef struct {
   unsigned int mqttPort;
   char mqttUser[32];
   char mqttPass[32];
+  unsigned int updateInterval;
 } DeviceConfig;
 
 DeviceConfig config;
@@ -56,17 +60,37 @@ void publishDHT() {
   dht.begin();
   delay(2000);  // Wait for sensor to gather data.
 
-  float temperature = dht.readTemperature(DHT_FAHRENHEIT);
+  float temperature = dht.readTemperature(true);  // true indicates temperature in Fahrenheit
   snprintf(buffer, sizeof buffer, "%3.2f", temperature);
-  publish("temperature", buffer);
+  publish("temperature/fahrenheit", buffer);
 
   float humidity = dht.readHumidity();
   snprintf(buffer, sizeof buffer, "%3.2f", humidity);
-  publish("humidity", buffer);
+  publish("humidity/percent", buffer);
 
-  float heatindex = dht.computeHeatIndex(temperature, humidity, DHT_FAHRENHEIT);
+  float heatindex = dht.computeHeatIndex(temperature, humidity, true);  // true indicates temperature in Fahrenheit
   snprintf(buffer, sizeof buffer, "%3.2f", heatindex);
-  publish("heatindex", buffer);
+  publish("heatindex/fahrenheit", buffer);
+}
+
+void publishBMP() {
+  Adafruit_BMP280 bmp;
+  char buffer[16];  // Used temporarily to convert floating point readings to strings.
+
+  Serial.println("Reading BMP sensor data.");
+  bmp.begin(BMP_I2C_ADDR, BMP280_CHIPID);
+
+  float temperature = bmp.readTemperature();  // temperature is always in Celsius.
+  snprintf(buffer, sizeof buffer, "%3.2f", temperature);
+  publish("temperature/celsius", buffer);
+
+  float pressure = bmp.readPressure(); // in Pascals
+  snprintf(buffer, sizeof buffer, "%5.0f", pressure);
+  publish("pressure/pascals", buffer);
+
+  float altitude = bmp.readAltitude(1013.25);  // sea level pressure in millibars (hectoPascals);
+  snprintf(buffer, sizeof buffer, "%5.0f", altitude);
+  publish("altitude/meters", buffer);
 }
 
 /**
@@ -125,6 +149,7 @@ void setConfigDefaults() {
   config.mqttPort = 1883;
   strcpy(config.mqttUser, "mqtt");
   strcpy(config.mqttPass, "password");
+  config.updateInterval = 300;
 }
 
 /**
@@ -143,14 +168,16 @@ void inputConfig() {
     Serial.println(config.wifiSSID);
     Serial.print("(3) WiFi password:    ");
     Serial.println(config.wifiPass);
-    Serial.print("(4) MQTT IP Address:  ");
+    Serial.print("(4) MQTT IP address:  ");
     Serial.println(config.mqttIP);
     Serial.print("(5) MQTT IP port:     ");
     Serial.println(config.mqttPort);
-    Serial.print("(6) MQTT IP user:     ");
+    Serial.print("(6) MQTT user:        ");
     Serial.println(config.mqttUser);
-    Serial.print("(7) MQTT IP password: ");
+    Serial.print("(7) MQTT password:    ");
     Serial.println(config.mqttPass);
+    Serial.print("(8) Update interval:  ");
+    Serial.println(config.updateInterval);
     Serial.println("(0) Save and exit.");
 
     // Prompt for changes.
@@ -225,6 +252,14 @@ void inputConfig() {
           }
           else {
             Serial.println("Input too long.");            
+          }
+          break;
+        case 8:
+          if (value.toInt() > 0) {
+            config.updateInterval = value.toInt();
+          }
+          else {
+            Serial.println("Input out of range.");
           }
           break;
       }
@@ -354,7 +389,10 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(SERIAL_BPS);
   Serial.println();
-
+  Serial.println("MQTT Baby");
+  Serial.println("https://github.com/DavesCodeMusings/mqttbaby");
+  Serial.println();
+  
   // Normal startup if device config exists. Otherwise, prompt for parameters.
   if (SPIFFS.begin()) {
     if (SPIFFS.exists(CONFIG_FILE)) {
@@ -396,7 +434,8 @@ void loop() {
   // Take readings from any attached sensors and publish data.
   if (MQTT_PING) publishPing();
   if (HAVE_DHT) publishDHT();
+  if (HAVE_BMP) publishBMP();
 
   digitalWrite(LED_BUILTIN, HIGH);
-  delay(UPDATE_INTERVAL * 1000);
+  delay(config.updateInterval * 1000);
 }
