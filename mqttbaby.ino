@@ -88,16 +88,28 @@ void publishDHT() {
   delay(2000);  // Wait for sensor to gather data.
 
   float temperature = dht.readTemperature(true);  // true indicates temperature in Fahrenheit
-  snprintf(buffer, sizeof buffer, "%3.2f", temperature);
-  publish("temperature/fahrenheit", buffer);
-
+  if (isnan(temperature)) {
+    publish("system", "Error reading DHT temperature.");
+  }
+  else {
+    snprintf(buffer, sizeof buffer, "%3.2f", temperature);
+    publish("temperature/fahrenheit", buffer);
+  }
+  
   float humidity = dht.readHumidity();
-  snprintf(buffer, sizeof buffer, "%3.2f", humidity);
-  publish("humidity/percent", buffer);
+  if (isnan(humidity)) {
+    publish("system", "Error reading DHT humidity.");
+  }
+  else {
+    snprintf(buffer, sizeof buffer, "%3.2f", humidity);
+    publish("humidity/percent", buffer);
+  }
 
-  float heatindex = dht.computeHeatIndex(temperature, humidity, true);  // true indicates temperature in Fahrenheit
-  snprintf(buffer, sizeof buffer, "%3.2f", heatindex);
-  publish("heatindex/fahrenheit", buffer);
+  if (!isnan(temperature) && !isnan(humidity)) {
+    float heatindex = dht.computeHeatIndex(temperature, humidity, true);  // true indicates temperature in Fahrenheit
+    snprintf(buffer, sizeof buffer, "%3.2f", heatindex);
+    publish("heatindex/fahrenheit", buffer);
+  }
 }
 
 void publishBMP() {
@@ -105,19 +117,23 @@ void publishBMP() {
   char buffer[16];  // Used temporarily to convert floating point readings to strings.
 
   Serial.println("Reading BMP sensor data.");
-  bmp.begin(BMP_I2C_ADDR, BMP280_CHIPID);
+  if (!bmp.begin(BMP_I2C_ADDR, BMP280_CHIPID)) {
+    Serial.println("Sensor not found.");
+    publish("system", "BMP sensor not found.");
+  }
+  else {
+    float temperature = bmp.readTemperature();  // temperature is always in Celsius.
+    snprintf(buffer, sizeof buffer, "%3.2f", temperature);
+    publish("temperature/celsius", buffer);
 
-  float temperature = bmp.readTemperature();  // temperature is always in Celsius.
-  snprintf(buffer, sizeof buffer, "%3.2f", temperature);
-  publish("temperature/celsius", buffer);
+    float pressure = bmp.readPressure(); // in Pascals
+    snprintf(buffer, sizeof buffer, "%5.0f", pressure);
+    publish("pressure/pascals", buffer);
 
-  float pressure = bmp.readPressure(); // in Pascals
-  snprintf(buffer, sizeof buffer, "%5.0f", pressure);
-  publish("pressure/pascals", buffer);
-
-  float altitude = bmp.readAltitude(1013.25);  // sea level pressure in millibars (hectoPascals);
-  snprintf(buffer, sizeof buffer, "%5.0f", altitude);
-  publish("altitude/meters", buffer);
+    float altitude = bmp.readAltitude(1013.25);  // sea level pressure in millibars (hectoPascals);
+    snprintf(buffer, sizeof buffer, "%5.0f", altitude);
+    publish("altitude/meters", buffer);
+  }
 }
 
 /**
