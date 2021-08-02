@@ -37,6 +37,8 @@
 #define WIFI_TIMEOUT 30  // number of seconds to wait for WiFi connection
 #define SERIAL_BPS 9600
 #define WAKE_WIRE false  // Is there a connection from WAKE pin to RST pin for deep sleep?
+
+// Sensor configuration
 #define MQTT_PING true  // send periodic test message to MQTT topic [deviceID]/system
 
 // User defined setup for network, authentication, etc.
