@@ -17,6 +17,8 @@ Once you have the prerequisites out of the way, here are the steps to get starte
 
 If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
 
+[Weather Baby](https://github.com/DavesCodeMusings/mqttbaby/blob/main/weatherbaby.ino) is an example of mqttbaby configured to read temperature, humidity, and barametric pressure with commonly used sensors. There is also a [wiki page](https://github.com/DavesCodeMusings/mqttbaby/wiki/Customizing-Sensors) that explains how to add just about any kind of sensor you want.
+
 ## Why?
 I wanted a way to collect outdoor temperature and humidity data for our Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on the back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C and make a better option for the winter months.
 
