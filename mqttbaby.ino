@@ -1,4 +1,4 @@
-/* mqttbaby 
+/* mqttbaby
  * For ESP8266, NodeMCU, D1, and clones. Publish sensor data to MQTT topics.
  * https://github.com/DavesCodeMusings/mqttbaby
  * 
@@ -30,24 +30,16 @@
 #include <FS.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include <DHT.h>
-#include <Adafruit_BMP280.h>
 
 // Device parameters
 #define CONFIG_FILE "device.cfg"
 #define CONFIG_DELAY 5  // number of seconds to display "press a key" prompt
 #define WIFI_TIMEOUT 30  // number of seconds to wait for WiFi connection
 #define SERIAL_BPS 9600
-#define WAKE_WIRE true  // Is there a connection from WAKE pin to RST pin for deep sleep?
+#define WAKE_WIRE false  // Is there a connection from WAKE pin to RST pin for deep sleep?
+#define MQTT_PING true  // send periodic test message to MQTT topic [deviceID]/system
 
-// Sensor parameters
-#define MQTT_PING false
-#define HAVE_DHT true
-#define DHT_TYPE DHT22  // can be DHT22 or DHT11
-#define DHT_PIN 14  // GPIO number; not the D number on the board!
-#define HAVE_BMP true
-#define BMP_I2C_ADDR (0x76)
-
+// User defined setup for network, authentication, etc.
 typedef struct {
   char deviceID[16];
   char wifiSSID[32];
@@ -64,8 +56,6 @@ WiFiClient wifi;
 PubSubClient mqtt(wifi);
 
 // Sensor functions -- These can be used inside the loop() function to gather data.
-
-
 /**
  * A fake sensor that can be used to verify connectivity when no sensors are configured.
  * Sends 'Ping.' to MQTT topic device_name/system.
@@ -74,68 +64,7 @@ void publishPing() {
   publish("system", "Ping.");
 }
 
-/**
- * Read temperature and humidity from DHT22 and publish to MQTT topics device_name/temperature and device_name/humidity.
- * More information about the DHT22 sensor library is available from https://github.com/adafruit/DHT-sensor-library
- * Sends temperature, humidity, and heatindex to topics device_name/temperature, device_name/humidity, and device_name/heatindex.
- */
-void publishDHT() {
-  DHT dht(DHT_PIN, DHT_TYPE);
-  char buffer[16];  // Used temporarily to convert floating point readings to strings.
-  
-  Serial.println("Reading DHT sensor data.");
-  dht.begin();
-  delay(2000);  // Wait for sensor to gather data.
-
-  float temperature = dht.readTemperature(true);  // true indicates temperature in Fahrenheit
-  if (isnan(temperature)) {
-    publish("system", "Error reading DHT temperature.");
-  }
-  else {
-    snprintf(buffer, sizeof buffer, "%3.2f", temperature);
-    publish("temperature/fahrenheit", buffer);
-  }
-  
-  float humidity = dht.readHumidity();
-  if (isnan(humidity)) {
-    publish("system", "Error reading DHT humidity.");
-  }
-  else {
-    snprintf(buffer, sizeof buffer, "%3.2f", humidity);
-    publish("humidity/percent", buffer);
-  }
-
-  if (!isnan(temperature) && !isnan(humidity)) {
-    float heatindex = dht.computeHeatIndex(temperature, humidity, true);  // true indicates temperature in Fahrenheit
-    snprintf(buffer, sizeof buffer, "%3.2f", heatindex);
-    publish("heatindex/fahrenheit", buffer);
-  }
-}
-
-void publishBMP() {
-  Adafruit_BMP280 bmp;
-  char buffer[16];  // Used temporarily to convert floating point readings to strings.
-
-  Serial.println("Reading BMP sensor data.");
-  if (!bmp.begin(BMP_I2C_ADDR, BMP280_CHIPID)) {
-    Serial.println("Sensor not found.");
-    publish("system", "BMP sensor not found.");
-  }
-  else {
-    float temperature = bmp.readTemperature();  // temperature is always in Celsius.
-    snprintf(buffer, sizeof buffer, "%3.2f", temperature);
-    publish("temperature/celsius", buffer);
-
-    float pressure = bmp.readPressure(); // in Pascals
-    snprintf(buffer, sizeof buffer, "%5.0f", pressure);
-    publish("pressure/pascals", buffer);
-
-    float altitude = bmp.readAltitude(1013.25);  // sea level pressure in millibars (hectoPascals);
-    snprintf(buffer, sizeof buffer, "%5.0f", altitude);
-    publish("altitude/meters", buffer);
-  }
-}
-
+// Core functions -- Common to any MQTT Baby sketch.
 /**
  * Read device configuration parameters from non-volitile memory filesystem.
  */
@@ -477,8 +406,6 @@ void loop() {
   
   // Take readings from any attached sensors and publish data.
   if (MQTT_PING) publishPing();
-  if (HAVE_DHT) publishDHT();
-  if (HAVE_BMP) publishBMP();
 
   digitalWrite(LED_BUILTIN, HIGH);
 
