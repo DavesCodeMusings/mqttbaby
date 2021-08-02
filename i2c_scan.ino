@@ -1,5 +1,5 @@
 /*
- * i2cscan -- probe I2C addresses and report on those that respond.
+ * i2c_scan -- probe I2C addresses and report on those that respond.
  */
 
 #include <Wire.h>
