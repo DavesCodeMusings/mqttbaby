@@ -49,8 +49,8 @@ char *ConfigBaby::read(char *key) {
   return value;
 }
 
-boolean ConfigBaby::write(char *key, char *value) {
-  boolean success = false;
+bool ConfigBaby::write(char *key, char *value) {
+  bool success = false;
   int index = this->indexOf(key);
   
   if (index != -1) {
@@ -63,7 +63,7 @@ boolean ConfigBaby::write(char *key, char *value) {
 
 void ConfigBaby::readln(int timeout) {
   int index = 0;
-  boolean done = false;
+  bool done = false;
 
   while (!done) {
     if (Serial.available()) {
@@ -96,8 +96,8 @@ void ConfigBaby::readln(int timeout) {
   }
 }
 
-boolean ConfigBaby::input() {
-  boolean done = false;
+bool ConfigBaby::input() {
+  bool done = false;
 
   Serial.setTimeout(60000); // 60 seconds expressed in milliseconds.
   Serial.println();

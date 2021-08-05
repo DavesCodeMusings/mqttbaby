@@ -47,14 +47,14 @@ class ConfigBaby {
     /** Replace the current value associated with key with value.
         @param key Pointer to key used in associative indexing
         @param value The new value to insert. */
-    boolean write(char *key, char *value);
+    bool write(char *key, char *value);
 
     /** Read a string of characters from serial input. Used internally for input() to fetch values.
         @param timeout The maximum time to wait for input before giving up and returning. */
     void readln(int timeout);
 
     /** Gather configuration values using an interactive menu. */
-    boolean input();
+    bool input();
 };
 
 #endif
