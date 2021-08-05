@@ -1,4 +1,14 @@
-# Sample device configuration using interactive menu method ConfigBaby::input() and PuTTY terminal emulator.
+# ConfigBaby
+
+## What is it?
+
+ConfigBaby is a class used to store a short list of configuration parameters in a key-value style associative array. It features an interactive setup menu that can be invoked to gather parameter values when a terminal emulator like Putty is attached to the COM port of the device. (The built-in Arduino IDE Serial Monitor does not work properly.)
+
+## Why should you care?
+
+If you want to create a sketch that allows configuration of certain parameters in the feild, rather than having them compiled in as #define macros, ConfigBaby might be useful for your project. For example, you may want to program a device in the lab and then let the end user set it up with networking parameters on site. 
+
+## Sample device configuration using interactive menu method ConfigBaby::input() and PuTTY terminal emulator.
 
 ```
 Device Configuration Menu
