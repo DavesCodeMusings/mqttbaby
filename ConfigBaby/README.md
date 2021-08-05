@@ -6,7 +6,7 @@ ConfigBaby is a class used to store a short list of configuration parameters in 
 
 ConfigBaby is not an all encompassing associative array solution. It is limited to only 9 total key-value pairs. The intent is to allow configuration of a few parameters for network configuration and authentication.
 
-Speaking of authentication, all of the parameters are stored in plain text. Anyone with physical access to you device could retreive them.
+Speaking of authentication, all of the parameters are stored in plain text. Anyone with physical access to you device could retreive them. You have been warned.
 
 Future enhancements will allow writing the key-value pairs to a file for persistent storage.
 
