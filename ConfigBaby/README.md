@@ -8,11 +8,11 @@ ConfigBaby is not an all encompassing associative array solution. It is limited 
 
 Speaking of authentication, all of the parameters are stored in plain text. Anyone with physical access to you device could retreive them. You have been warned.
 
-Future enhancements will allow writing the key-value pairs to a file for persistent storage.
+Future enhancements will allow writing the key-value pairs to text for persistent storage.
 
 ## Why should you care?
 
-If you want to create a sketch that allows configuration of certain parameters in the field, rather than having them compiled in as #define macros, ConfigBaby might be useful for your project. For example, you may want to program a device in the lab and then let the end user set it up with networking parameters applicable to the site.
+If you want to create a sketch that allows certain parameters to be configured in the field, rather than having them compiled in as #define macros, ConfigBaby might be useful for your project. For example, you may want to program a device in the lab and then let the end user set it up with networking parameters applicable to the site.
 
 ## Sample device configuration using interactive menu method ConfigBaby::input() and PuTTY terminal emulator.
 
@@ -45,6 +45,11 @@ Enter new value for Gateway: 172.16.1.1
 (0) Save and exit.
 Parameter?
 ```
+Pretty neat, huh?
+
+## How can you get started using it?
+
+The ConfigBaby.h file has comments describing with the methods do and what parameters they expect. All of the variables and methods are public, though using some of them are intended for internal use. These include writeValue(), indexOf(), and readln(). Using writeValue() and indexOf() in the main sketch would defeat the idea of the key-value concept. And readln() only exists because Serial.readUntil() does not echo characters as they are typed.
 
 ## Where is all this going?
 
