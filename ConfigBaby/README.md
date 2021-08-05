@@ -39,3 +39,9 @@ Enter new value for Gateway: 172.16.1.1
 (0) Save and exit.
 Parameter?
 ```
+
+## Where is all this going?
+
+I created ConfigBaby to use in my MQTTBaby project. (That might help explain the name.) MQTTBaby is a sketch that can be flashed to an ESP8266 to allow polling sensors and publishing data to MQTT topics.
+
+My plan is to add serialize() and deserialize() methods to ConfigBaby so that the parameters can be stored to flash memory with SPIFFS or using a micro SD card.
