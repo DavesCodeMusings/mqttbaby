@@ -10,7 +10,7 @@ Speaking of authentication, all of the parameters are stored in plain text. Anyo
 
 Future enhancements will allow writing the key-value pairs to text for persistent storage.
 
-## Why should you care?
+## Why should I care?
 
 If you want to create a sketch that allows certain parameters to be configured in the field, rather than having them compiled in as #define macros, ConfigBaby might be useful for your project. For example, you may want to program a device in the lab and then let the end user set it up with networking parameters applicable to the site.
 
@@ -41,14 +41,18 @@ Enter new value for MQTT Password: P@ssw0rd
 
 Pretty neat, huh?
 
-## How can you get started using it?
+## How can I get started using it?
 
 Take a look at the ConfigBaby.ino sketch for examples of creating a config, let the user interact with it through the menu, and finally serialize the data for persistent storage.
 
 For a deeper look, the ConfigBaby.h file has comments describing with the methods do and what parameters they expect. Currently, all of the variables and methods are public, though using some of them are intended for internal use. These include writeValue(), indexOf(), and readln(). Using writeValue() and indexOf() in the main sketch would defeat the idea of the key-value concept. And readln() only exists because Serial.readUntil() does not echo characters as they are typed.
 
+## What pitfalls should I watch out for?
+
+The `begin()` method uses the C function `strtok()` to separate the comma-separated values in the key and values lists passed to `begin()`. I only recently found out `strtok()` is a destructive function, meaning it mangles the input string as it parses it. Calling `begin()` more than once will give very strange results. It could be doing even more harm I'm not aware of. Things appear to be fine when `begin()` is only called once. But, I will be updating to avoid `strtok()`.
+
 ## Where is all this going?
 
 I created ConfigBaby to use in my MQTTBaby project. (That might help explain the name.) MQTTBaby is a sketch that can be flashed to an ESP8266 to allow polling sensors and publishing data to MQTT topics. Originally, I was gathering parameters using hardcoded parameter names and a C struct to hold the values. ConfigBaby adds more flexibility.
 
-My plan is to add a deserialize() method to so the parameters can be retrieved from persistent storage and put back into the configuration. I'm also looking at ways to make the internal storage of key-value pairs more space efficient.
+My plan is to add a deserialize() method to so the parameters can be retrieved from persistent storage and put back into the configuration. I'm also looking at ways to make the internal storage of key-value pairs more space efficient and get rid of the evil `strtok()` at the same time.
