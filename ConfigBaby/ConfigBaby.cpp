@@ -5,11 +5,11 @@ ConfigBaby::ConfigBaby() {}
 int ConfigBaby::begin(char *keysCSV) {
   char *tokenPointer;
   int index = 0;
-  
+
   tokenPointer = strtok(keysCSV, ",");
   while (tokenPointer != NULL) {
-    strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN);
-    this->values[index][0] = NULL;
+    strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
+    this->values[index][0] = NULL;  // Value string is empty.
     index++;
     if (index > MAX_KEYS) {
       break;
@@ -18,11 +18,43 @@ int ConfigBaby::begin(char *keysCSV) {
   }
   this->numPairs = index;
 
-  return index;
+  return this->numPairs;
+}
+
+int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
+  char *tokenPointer;
+  int index = 0;
+
+  // Keys.
+  tokenPointer = strtok(keysCSV, ",");
+  while (tokenPointer != NULL) {
+    strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
+    this->values[index][0] = NULL;  // Set as empty in case not all values are filled.
+    index++;
+    if (index > MAX_KEYS) {
+      break;
+    }
+    tokenPointer = strtok(NULL, ",");
+  }
+  this->numPairs = index;
+
+  // Default values.
+  index = 0;
+  tokenPointer = strtok(valuesCSV, ",");
+  while (tokenPointer != NULL) {
+    strncpy(this->values[index], tokenPointer, MAX_VALUE_LEN - 1);
+    index++;
+    if (index > MAX_KEYS) {
+      break;
+    }
+    tokenPointer = strtok(NULL, ",");
+  }
+
+  return this->numPairs;  // Return the number of indexes stored, regardless if the number of values matched. 
 }
 
 void ConfigBaby::writeValue(int index, const char *value) {
-  strncpy(this->values[index], value, MAX_VALUE_LEN);  
+  strncpy(this->values[index], value, MAX_VALUE_LEN - 1);  
 }
   
 int ConfigBaby::indexOf(char *key) {
@@ -54,7 +86,7 @@ bool ConfigBaby::write(char *key, char *value) {
   int index = this->indexOf(key);
   
   if (index != -1) {
-    strncpy(this->values[index], value, MAX_VALUE_LEN);
+    strncpy(this->values[index], value, MAX_VALUE_LEN - 1);
     success = true;
   }
   
@@ -69,11 +101,12 @@ void ConfigBaby::readln(int timeout) {
     if (Serial.available()) {
       char c = Serial.read();
       switch(c) {
-        case 0x0d:  // Carriage Return (or Enter key)
-          this->readlnBuffer[index] = c;
+        case 0x0d:  // Carriage Return (Enter key)
+          this->readlnBuffer[index] = NULL;  // Terminate string.
           done = true;
           break;
-        case 0x7f:  // Backspace
+        case 0x7f:  // Backspace on a PC
+        case 0x08:  // ^H (Backspace on a terminal???)
           if (index > 0) {
             Serial.print(c);
             index--;
@@ -83,7 +116,7 @@ void ConfigBaby::readln(int timeout) {
           }
           break;
         default:  // Any other key
-          if (index < MAX_VALUE_LEN - 1) {  // Save room for null terminator.
+          if (index < MAX_VALUE_LEN - 1) {  // Save one character for null terminator.
             Serial.print(c);
             this->readlnBuffer[index] = c;
             index++;
@@ -120,16 +153,20 @@ bool ConfigBaby::input() {
     Serial.print("Parameter? ");
     while (!Serial.available());
     int choice = Serial.read() - '0';  // Convert ASCII character to a number by subracting ASCII value of zero.
-    Serial.println(choice);
-
+      
     if (choice == 0) {
+      Serial.println(choice);
       done = true;
     }
     else {
-      if (choice > this->numPairs) {
-        Serial.println("Invalid choice.\n");
+      if (choice < 0 || choice > this->numPairs) {
+        Serial.println("\007");  // ASCII BEL (Should beep or flash the screen depending on terminal emulator.) 
+        Serial.print("Chose a number between 0 and ");
+        Serial.println(this->numPairs);
+        Serial.println(".");
       }
       else {
+        Serial.println(choice);
         Serial.print("Enter new value for ");
         Serial.print(this->keys[choice - 1]);
         Serial.print(": ");
@@ -141,4 +178,18 @@ bool ConfigBaby::input() {
   }
 
   return done;
+}
+
+int ConfigBaby::serialize(char *buffer) {
+  int offset = 0;  // Tracks current position from start of buffer.
+
+  // Why does snprintf use a maximum size specifier of MAX_KEY_LEN + MAX_VALUE_LEN + 4 ?
+  // The maximum characters in each key will be MAX_KEY_LEN - 1. -1, because of the null terminator which is not saved to the file.
+  // The same calculation applies to the maximum characters in each value. The 'key = value' format adds 1 character for the equal
+  // sign and 2 for each space. The carriage return and newline add 2 more. There also needs to be room for 1 null terminator. 
+  for(int index = 0; index < numPairs; index++) {
+     offset += snprintf(buffer + offset, MAX_KEY_LEN + MAX_VALUE_LEN + 4, "%s = %s\r\n", keys[index], values[index]);
+  }
+
+  return offset;  // Equates to the number of characters in the buffer (not including null terminator.)
 }
