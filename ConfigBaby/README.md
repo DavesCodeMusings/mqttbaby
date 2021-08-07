@@ -18,41 +18,37 @@ If you want to create a sketch that allows certain parameters to be configured i
 
 ```
 Device Configuration Menu
-(1) IP Address        192.168.1.10
-(2) Subnet Mask       255.255.255.0
-(3) Gateway           192.168.1.1
+(1) WiFi SSID         collins
+(2) WiFi Password     sussudio
+(3) MQTT IP Address   192.168.1.18
+(4) MQTT Port         1883
+(5) MQTT Username     admin
+(6) MQTT Password     abc123
 (0) Save and exit.
-Parameter? 1
-Enter new value for IP Address: 172.16.1.100
+Parameter? 5
+Enter new value for MQTT Username: Contoso
 
-(1) IP Address        172.16.1.100
-(2) Subnet Mask       255.255.255.0
-(3) Gateway           192.168.1.1
+(1) WiFi SSID         collins
+(2) WiFi Password     sussudio
+(3) MQTT IP Address   192.168.1.18
+(4) MQTT Port         1883
+(5) MQTT Username     Contoso
+(6) MQTT Password     abc123
 (0) Save and exit.
-Parameter? 2
-Enter new value for Subnet Mask: 255.255.0.0
-
-(1) IP Address        172.16.1.100
-(2) Subnet Mask       255.255.0.0
-(3) Gateway           192.168.1.1
-(0) Save and exit.
-Parameter? 3
-Enter new value for Gateway: 172.16.1.1
-
-(1) IP Address        172.16.1.100
-(2) Subnet Mask       255.255.0.0
-(3) Gateway           172.16.1.1
-(0) Save and exit.
-Parameter?
+Parameter? 6
+Enter new value for MQTT Password: P@ssw0rd
 ```
+
 Pretty neat, huh?
 
 ## How can you get started using it?
 
-The ConfigBaby.h file has comments describing with the methods do and what parameters they expect. All of the variables and methods are public, though using some of them are intended for internal use. These include writeValue(), indexOf(), and readln(). Using writeValue() and indexOf() in the main sketch would defeat the idea of the key-value concept. And readln() only exists because Serial.readUntil() does not echo characters as they are typed.
+Take a look at the ConfigBaby.ino sketch for examples of creating a config, let the user interact with it through the menu, and finally serialize the data for persistent storage.
+
+For a deeper look, the ConfigBaby.h file has comments describing with the methods do and what parameters they expect. Currently, all of the variables and methods are public, though using some of them are intended for internal use. These include writeValue(), indexOf(), and readln(). Using writeValue() and indexOf() in the main sketch would defeat the idea of the key-value concept. And readln() only exists because Serial.readUntil() does not echo characters as they are typed.
 
 ## Where is all this going?
 
 I created ConfigBaby to use in my MQTTBaby project. (That might help explain the name.) MQTTBaby is a sketch that can be flashed to an ESP8266 to allow polling sensors and publishing data to MQTT topics. Originally, I was gathering parameters using hardcoded parameter names and a C struct to hold the values. ConfigBaby adds more flexibility.
 
-My plan is to add serialize() and deserialize() methods to ConfigBaby so that the parameters can be stored to flash memory with SPIFFS or using a micro SD card.
+My plan is to add a deserialize() method to so the parameters can be retrieved from persistent storage and put back into the configuration. I'm also looking at ways to make the internal storage of key-value pairs more space efficient.
