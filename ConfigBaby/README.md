@@ -2,13 +2,12 @@
 
 ## What is it?
 
-ConfigBaby is a class used to store a short list of configuration parameters in a key-value style associative array. It features an interactive setup menu that can be invoked to gather parameter values when a terminal emulator like Putty is attached to the COM port of the device. (The built-in Arduino IDE Serial Monitor does not work properly.)
+ConfigBaby is a class used to store a short list of configuration parameters in a key-value style associative array. It features an interactive setup menu that can be invoked to gather parameter values when a terminal emulator like Putty is attached to the COM port of the device. (The built-in Arduino IDE Serial Monitor does not work properly.) It can also serialize the key-value pairs so you can store them in a file or flash memory.
 
 ConfigBaby is not an all encompassing associative array solution. It is limited to only 9 total key-value pairs. The intent is to allow configuration of a few parameters for network configuration and authentication.
 
 Speaking of authentication, all of the parameters are stored in plain text. Anyone with physical access to you device could retreive them. You have been warned.
 
-Future enhancements will allow writing the key-value pairs to text for persistent storage.
 
 ## Why should I care?
 
