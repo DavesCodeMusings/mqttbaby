@@ -3,10 +3,12 @@
 ConfigBaby::ConfigBaby() {}
 
 int ConfigBaby::begin(char *keysCSV) {
+  char keysBuffer[strlen(keysCSV)];  // strtok() is destructive to the string, so a temporary buffer is used.
+  strcpy(keysBuffer, keysCSV);
   char *tokenPointer;
   int index = 0;
 
-  tokenPointer = strtok(keysCSV, ",");
+  tokenPointer = strtok(keysBuffer, ",");
   while (tokenPointer != NULL) {
     strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
     this->values[index][0] = NULL;  // Value string is empty.
@@ -22,11 +24,15 @@ int ConfigBaby::begin(char *keysCSV) {
 }
 
 int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
+  char keysBuffer[strlen(keysCSV)];  // strtok() is destructive to the string, so a temporary buffer is used.
+  strcpy(keysBuffer, keysCSV);
+  char valuesBuffer[strlen(valuesCSV)];
+  strcpy(valuesBuffer, valuesCSV);
   char *tokenPointer;
   int index = 0;
 
   // Keys.
-  tokenPointer = strtok(keysCSV, ",");
+  tokenPointer = strtok(keysBuffer, ",");
   while (tokenPointer != NULL) {
     strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
     this->values[index][0] = NULL;  // Set as empty in case not all values are filled.
@@ -40,7 +46,7 @@ int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
 
   // Default values.
   index = 0;
-  tokenPointer = strtok(valuesCSV, ",");
+  tokenPointer = strtok(valuesBuffer, ",");
   while (tokenPointer != NULL) {
     strncpy(this->values[index], tokenPointer, MAX_VALUE_LEN - 1);
     index++;
@@ -161,9 +167,9 @@ bool ConfigBaby::input() {
     else {
       if (choice < 0 || choice > this->numPairs) {
         Serial.println("\007");  // ASCII BEL (Should beep or flash the screen depending on terminal emulator.) 
-        Serial.print("Chose a number between 0 and ");
-        Serial.println(this->numPairs);
-        Serial.println(".");
+        Serial.print("Select a number between 0 and ");
+        Serial.print(this->numPairs);
+        Serial.println(".\n");
       }
       else {
         Serial.println(choice);
