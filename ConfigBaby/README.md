@@ -54,4 +54,4 @@ The `begin()` method uses the C function `strtok()` to separate the comma-separa
 
 I created ConfigBaby to use in my MQTTBaby project. (That might help explain the name.) MQTTBaby is a sketch that can be flashed to an ESP8266 to allow polling sensors and publishing data to MQTT topics. Originally, I was gathering parameters using hardcoded parameter names and a C struct to hold the values. ConfigBaby adds more flexibility.
 
-My plan is to add a deserialize() method to so the parameters can be retrieved from persistent storage and put back into the configuration. I'm also looking at ways to make the internal storage of key-value pairs more space efficient and get rid of the evil `strtok()` at the same time.
+I'm still planning to add a deserialize() method to so the parameters can be retrieved from persistent storage and put back into the configuration.
