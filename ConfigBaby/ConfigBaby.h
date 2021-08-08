@@ -19,7 +19,10 @@
  */
 class ConfigBaby {    
   private:
-//    int numPairs;  // the number of key-value pairs actually in use
+    int numPairs;  // the number of key-value pairs actually in use
+    char keys[MAX_KEYS][MAX_KEY_LEN];  // keys portion of the associative array
+    char values[MAX_KEYS][MAX_KEY_LEN];  // values portion of the associate array
+    char readlnBuffer[MAX_VALUE_LEN + 1];  // temporary storage for menu input
 
     /** Search for key and return its array index.
         @param key Pointer to search key. */
@@ -30,14 +33,11 @@ class ConfigBaby {
         @param value The value to be stored. */
     void writeValue(int index, const char *value);
 
-  public:
-    int numPairs;  // the number of key-value pairs actually in use
-    
-    char readlnBuffer[MAX_VALUE_LEN + 1];  // temporary storage for menu input
-    char keys[MAX_KEYS][MAX_KEY_LEN];  // keys portion of the associative array
-    char values[MAX_KEYS][MAX_KEY_LEN];  // values portion of the associate array
+    /** Read a string of characters from serial input. Used internally for input() to fetch values.
+        @param timeout The maximum time to wait for input before giving up and returning. */
+    void readln(int timeout);
 
-    /** Constructor */
+  public:
     ConfigBaby();
 
     /** Initialize the associative array with key names and optional default values.
@@ -53,10 +53,6 @@ class ConfigBaby {
         @param key Pointer to key used in associative indexing
         @param value The new value to insert. */
     bool write(char *key, char *value);
-
-    /** Read a string of characters from serial input. Used internally for input() to fetch values.
-        @param timeout The maximum time to wait for input before giving up and returning. */
-    void readln(int timeout);
 
     /** Gather configuration values using an interactive menu. */
     bool input();

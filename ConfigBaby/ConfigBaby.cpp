@@ -10,17 +10,17 @@ int ConfigBaby::begin(char *keysCSV) {
 
   tokenPointer = strtok(keysBuffer, ",");
   while (tokenPointer != NULL) {
-    strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
-    this->values[index][0] = NULL;  // Value string is empty.
+    strncpy(keys[index], tokenPointer, MAX_KEY_LEN - 1);
+    values[index][0] = NULL;  // Value string is empty.
     index++;
     if (index > MAX_KEYS) {
       break;
     }
     tokenPointer = strtok(NULL, ",");
   }
-  this->numPairs = index;
+  numPairs = index;
 
-  return this->numPairs;
+  return numPairs;
 }
 
 int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
@@ -34,21 +34,21 @@ int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
   // Keys.
   tokenPointer = strtok(keysBuffer, ",");
   while (tokenPointer != NULL) {
-    strncpy(this->keys[index], tokenPointer, MAX_KEY_LEN - 1);
-    this->values[index][0] = NULL;  // Set as empty in case not all values are filled.
+    strncpy(keys[index], tokenPointer, MAX_KEY_LEN - 1);
+    values[index][0] = NULL;  // Set as empty in case not all values are filled.
     index++;
     if (index > MAX_KEYS) {
       break;
     }
     tokenPointer = strtok(NULL, ",");
   }
-  this->numPairs = index;
+  numPairs = index;
 
   // Default values.
   index = 0;
   tokenPointer = strtok(valuesBuffer, ",");
   while (tokenPointer != NULL) {
-    strncpy(this->values[index], tokenPointer, MAX_VALUE_LEN - 1);
+    strncpy(values[index], tokenPointer, MAX_VALUE_LEN - 1);
     index++;
     if (index > MAX_KEYS) {
       break;
@@ -56,18 +56,18 @@ int ConfigBaby::begin(char *keysCSV, char *valuesCSV) {
     tokenPointer = strtok(NULL, ",");
   }
 
-  return this->numPairs;  // Return the number of indexes stored, regardless if the number of values matched. 
+  return numPairs;  // Return the number of indexes stored, regardless if the number of values matched. 
 }
 
 void ConfigBaby::writeValue(int index, const char *value) {
-  strncpy(this->values[index], value, MAX_VALUE_LEN - 1);  
+  strncpy(values[index], value, MAX_VALUE_LEN - 1);  
 }
   
 int ConfigBaby::indexOf(char *key) {
   int match = -1;  // Signifies key was not found.
   
   for (int index=0; index<MAX_KEYS; index++) {
-    if (strcmp(key, this->keys[index]) == 0) {
+    if (strcmp(key, keys[index]) == 0) {
       match = index;
       break;
     }
@@ -79,9 +79,9 @@ int ConfigBaby::indexOf(char *key) {
 char *ConfigBaby::read(char *key) {
   char *value = NULL;  // Signifies key was not found.
 
-  int index = this->indexOf(key);
+  int index = indexOf(key);
   if (index != -1) {
-    value = this->values[index];
+    value = values[index];
   }
   
   return value;
@@ -89,10 +89,10 @@ char *ConfigBaby::read(char *key) {
 
 bool ConfigBaby::write(char *key, char *value) {
   bool success = false;
-  int index = this->indexOf(key);
+  int index = indexOf(key);
   
   if (index != -1) {
-    strncpy(this->values[index], value, MAX_VALUE_LEN - 1);
+    strncpy(values[index], value, MAX_VALUE_LEN - 1);
     success = true;
   }
   
@@ -108,7 +108,7 @@ void ConfigBaby::readln(int timeout) {
       char c = Serial.read();
       switch(c) {
         case 0x0d:  // Carriage Return (Enter key)
-          this->readlnBuffer[index] = NULL;  // Terminate string.
+          readlnBuffer[index] = NULL;  // Terminate string.
           done = true;
           break;
         case 0x7f:  // Backspace on a PC
@@ -124,7 +124,7 @@ void ConfigBaby::readln(int timeout) {
         default:  // Any other key
           if (index < MAX_VALUE_LEN - 1) {  // Save one character for null terminator.
             Serial.print(c);
-            this->readlnBuffer[index] = c;
+            readlnBuffer[index] = c;
             index++;
           }
           else {
@@ -143,16 +143,16 @@ bool ConfigBaby::input() {
   Serial.println("Device Configuration Menu");
 
   while (!done) {
-    for(int index = 0; index < this->numPairs; index++) {
+    for(int index = 0; index < numPairs; index++) {
       Serial.print("(");
       Serial.print(index + 1);  // C starts at 0, humans start at 1.
       Serial.print(") ");
-      Serial.print(this->keys[index]);
-      for(int i = 0; i < MAX_KEY_LEN - strlen(this->keys[index]); i++) {
+      Serial.print(keys[index]);
+      for(int i = 0; i < MAX_KEY_LEN - strlen(keys[index]); i++) {
         Serial.print(" ");
       }
       Serial.print("  ");
-      Serial.println(this->values[index]);
+      Serial.println(values[index]);
     }
     Serial.println("(0) Save and exit.");
 
@@ -165,20 +165,20 @@ bool ConfigBaby::input() {
       done = true;
     }
     else {
-      if (choice < 0 || choice > this->numPairs) {
+      if (choice < 0 || choice > numPairs) {
         Serial.println("\007");  // ASCII BEL (Should beep or flash the screen depending on terminal emulator.) 
         Serial.print("Select a number between 0 and ");
-        Serial.print(this->numPairs);
+        Serial.print(numPairs);
         Serial.println(".\n");
       }
       else {
         Serial.println(choice);
         Serial.print("Enter new value for ");
-        Serial.print(this->keys[choice - 1]);
+        Serial.print(keys[choice - 1]);
         Serial.print(": ");
-        this->readln(30);
+        readln(30);
         Serial.println("\n");
-        this->writeValue(choice - 1, this->readlnBuffer);
+        writeValue(choice - 1, readlnBuffer);
       }
     }
   }
