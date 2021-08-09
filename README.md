@@ -3,21 +3,18 @@ This project centers around an Arduino IDE sketch for the ESP8266 microcontrolle
 
 Writing the sketch to an 8266 microcontroller will create a basic system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
 
-## How to use it
+## How Can I Use It?
 You'll first want to be familiar with using the Arduino IDE for ESP2866 devices. There are several internet tutorials on this topic along with the [official project](https://github.com/esp8266/Arduino) to get you going. You'll also need an MQTT server and a home automation system to integrate with. The [CloudPi](https://github.com/DavesCodeMusings/CloudPi) project may be helpful if you don't have MQTT or home automation installed yet.
 
 Once you have the prerequisites out of the way, here are the steps to get started.
 1. Use the Arduino IDE to flash the mqttbaby.ino sketch.
 2. Set up PuTTY or another serial program to attach to your ESP8266's COM port at 9600bps, 8 bits, one stop bit, no parity.
-3. Turn on Local Echo for the serial connection, otherwise you won't see what you're typing.
-4. Reset the 8266.
-5. On first boot, the device will enter the setup menu. Enter the parameters for your network.
-6. Save the parameters and verify the device can find your WiFi and MQTT server.
-7. Further verify by using Home Assistant's MQTT integration utility to listen to the MQTT topic being sent. (The 8266 serial debug output will show the topic and message.)
+3. Reset the 8266.
+4. On first boot, the device will enter the setup menu. Enter the parameters for your network.
+5. Save the parameters and verify the device can find your WiFi and MQTT server.
+6. Further verify by using Home Assistant's MQTT integration utility to listen to the MQTT topic being sent. (The 8266 serial debug output will show the topic and message.)
 
 If you can do that, your MQTT Baby is ready to customize. Add any sensor reading functions you want and repeat the steps above to verify the data is being sent to MQTT.
-
-[Weather Baby](https://github.com/DavesCodeMusings/mqttbaby/blob/main/weatherbaby.ino) is an example of mqttbaby configured to read temperature, humidity, and barametric pressure with commonly used sensors. There is also a [wiki page](https://github.com/DavesCodeMusings/mqttbaby/wiki/Customizing-Sensors) that explains how to add just about any kind of sensor you want.
 
 ## Why?
 I wanted a way to collect outdoor temperature and humidity data for our Home Assistant home automation installation. There's a cute little Xaiomi Mijia device with [custom firmware](https://github.com/atc1441/ATC_MiThermometer) sitting on the back porch that does this very nicely when paired with ESPHome. But, it's really an indoor device. It's not weather resistant and the temperature range only goes down to 0 Celsius. The popular DHT22 temperature / humidity sensor and ESP8266 can withstand -40C and make a better option for the winter months.
