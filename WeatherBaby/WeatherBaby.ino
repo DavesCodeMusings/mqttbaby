@@ -258,7 +258,8 @@ void loop() {
   publish("", "ping", false);  // Send a ping message to the device topic (no /subtopic) and flag it as not retained.
 
   // This is where you would take sensor readings and publish the data. Unlike the ping example, you'll probably want to set the retained flag.
-  // readBME280(0x76);
+  // There is no harm in reading a non-existent sensor, other than the error message on serial output, but you might want to remove the unused one.
+  readBME280(0x76);
   readBMP280(0x76);
 
   unsigned long duration = millis() - startTime;  // Calculate the length of time it took for update and publish.
