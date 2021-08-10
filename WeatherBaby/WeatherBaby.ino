@@ -4,6 +4,7 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <Adafruit_BME280.h>
+#include <Adafruit_BMP280.h>
 
 #include "ConfigBaby.h"
 
@@ -14,6 +15,7 @@ ConfigBaby deviceConfig;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
 Adafruit_BME280 bme;
+Adafruit_BMP280 bmp;
 
 void wifiConnect() {
   int timeout = 30;
@@ -123,23 +125,50 @@ void readBME280(int address) {
     Serial.println(address, HEX);
   }
   else {
-    char buffer[7];  // Temporary storage for floating point to string conversions.
+    char buffer[8];  // Temporary storage for floating point to string conversions.
 
     float temperature = bme.readTemperature();
     float humidity = bme.readHumidity();
     float pressure = bme.readPressure();
 
     // Readings come the sensor as floating point values and must be converted to strings for publishing.
-    snprintf(buffer, 5, "%3.1f", temperature);
-    publish("temperature/celsius", buffer, true);
-    snprintf(buffer, 5, "%3.1f", 1.8 * temperature + 32);
-    publish("temperature/fahrenheit", buffer, true);
+    snprintf(buffer, 6, "%3.1f", temperature);
+    publish("temperature/C", buffer, true);
+    snprintf(buffer, 6, "%3.1f", 1.8 * temperature + 32);
+    publish("temperature/F", buffer, true);
     snprintf(buffer, 4, "%3.0f", humidity);
-    publish("humidity/percent", buffer, true);
+    publish("humidity/pct", buffer, true);
     snprintf(buffer, 7, "%6.0f", pressure);
-    publish("pressure/pascals", buffer, true);
-    snprintf(buffer, 7, "%4.2f", pressure / 100);    
-    publish("pressure/millibars", buffer, true);
+    publish("pressure/Pa", buffer, true);
+    snprintf(buffer, 8, "%4.2f", pressure / 100);    
+    publish("pressure/mbar", buffer, true);
+    snprintf(buffer, 6, "%2.2f", pressure / 3386.39);
+    publish("pressure/inHg", buffer, true);
+  }
+}
+
+void readBMP280(int address) {
+  if (!bmp.begin(address)) {
+    Serial.print("No BMP280 found at I2C address: ");
+    Serial.println(address, HEX);
+  }
+  else {
+    char buffer[8];  // Temporary storage for floating point to string conversions.
+
+    float temperature = bmp.readTemperature();
+    float pressure = bmp.readPressure();
+
+    // Readings come the sensor as floating point values and must be converted to strings for publishing.
+    snprintf(buffer, 6, "%3.1f", temperature);
+    publish("temperature/C", buffer, true);
+    snprintf(buffer, 6, "%3.1f", 1.8 * temperature + 32);
+    publish("temperature/F", buffer, true);
+    snprintf(buffer, 7, "%6.0f", pressure);
+    publish("pressure/Pa", buffer, true);
+    snprintf(buffer, 8, "%4.2f", pressure / 100);    
+    publish("pressure/mbar", buffer, true);
+    snprintf(buffer, 6, "%2.2f", pressure / 3386.39);
+    publish("pressure/inHg", buffer, true);
   }
 }
 
@@ -229,7 +258,7 @@ void loop() {
   publish("", "ping", false);  // Send a ping message to the device topic (no /subtopic) and flag it as not retained.
 
   // This is where you would take sensor readings and publish the data. Unlike the ping example, you'll probably want to set the retained flag.
-  readBME280(0x76);
+  readBMP280(0x76);
 
   unsigned long duration = millis() - startTime;  // Calculate the length of time it took for update and publish.
   delay(atoi(deviceConfig.read("Update Interval")) * 60e3 - duration);  // Update Interval is in minutes. 60e3 is milliseconds in a minute.
