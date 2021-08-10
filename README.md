@@ -1,7 +1,7 @@
 # MQTT Baby
 This project centers around an Arduino IDE sketch for the ESP8266 microcontroller. It allows NodeMCU, WeMos, D1 (and possibly other) boards to easily connect to WiFi and publish messages to an MQTT server on the local network. It also includes a serial monitor-based setup utility to allow WiFi and MQTT credentials, along with other parameters, to be entered and stored in non-volitile memory.
 
-Writing the sketch to an 8266 microcontroller will create a basic system than sends a periodic ping to an MQTT server. Publishing data from attached sensors should simply be a matter of adding a function to the loop.
+Writing the sketch to an 8266 microcontroller will create a basic system than sends a periodic ping to an MQTT server. Publishing data from attached sensors is simply a matter of adding a function to the loop.
 
 ## How Can I Use It?
 You'll first want to be familiar with using the Arduino IDE for ESP2866 devices. There are several internet tutorials on this topic along with the [official project](https://github.com/esp8266/Arduino) to get you going. You'll also need an MQTT server and a home automation system to integrate with. The [CloudPi](https://github.com/DavesCodeMusings/CloudPi) project may be helpful if you don't have MQTT or home automation installed yet.
