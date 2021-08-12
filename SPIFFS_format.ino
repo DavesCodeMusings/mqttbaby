@@ -7,14 +7,18 @@
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(9600);
   Serial.println();
-  Serial.print("Formatting... ");
-  SPIFFS.begin();
-  SPIFFS.format();
-  Serial.println("Done.");
-  digitalWrite(LED_BUILTIN, HIGH);
+  if (!SPIFFS.begin()) {
+    Serial.println("Error accessing flash filesystem.");
+  }
+  else {
+    digitalWrite(LED_BUILTIN, LOW);
+    Serial.print("Formatting... ");
+    SPIFFS.format();
+    Serial.println("Done.");
+    digitalWrite(LED_BUILTIN, HIGH);
+  }
 }
 
 void loop() {
