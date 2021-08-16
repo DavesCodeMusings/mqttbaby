@@ -11,11 +11,16 @@
 #define CONFIG_FILE "device.cfg"
 #define MQTT_RETAINED true
 
+// ESP8266s need a jumper wire from WAKE to RST, otherwise they'll deep sleep forever. ESP32 doesn't need it. Set to false only for ESP8266 without the jumper wire.
+#define WAKE_WIRE true
+
+// Verify the correct I2C address for your hardware. Adafruit uses 0x77, imports tend toward 0x76.
+#define I2C_ADDRESS 0x76
+
 ConfigBaby deviceConfig;
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
 Adafruit_BME280 bme;
-Adafruit_BMP280 bmp;
 
 void wifiConnect() {
   int timeout = 30;
@@ -121,48 +126,27 @@ void publish(const char* subTopic, const char* message, const bool retained) {
 
 void readBME280(int address) {
   if (!bme.begin(address)) {
-    Serial.print("No BME280 found at I2C address: ");
+    Serial.print("No BME280 found at I2C address: 0x");
     Serial.println(address, HEX);
   }
   else {
     char buffer[8];  // Temporary storage for floating point to string conversions.
 
+    // Set up device for "weather station mode" (See data sheet for definition.)
+    bme.setSampling(Adafruit_BME280::MODE_FORCED, Adafruit_BME280::SAMPLING_X1, Adafruit_BME280::SAMPLING_X1, Adafruit_BME280::SAMPLING_X1, Adafruit_BME280::FILTER_OFF);
+    bme.takeForcedMeasurement();  // Take a reading and then go back to sleep. This mitigates self-heating that causes temperature readings to be too high.
     float temperature = bme.readTemperature();
     float humidity = bme.readHumidity();
     float pressure = bme.readPressure();
 
     // Readings come the sensor as floating point values and must be converted to strings for publishing.
+    // See https://www.nist.gov/pml/weights-and-measures/writing-metric-units for uppercase naming rules.
     snprintf(buffer, 6, "%3.1f", temperature);
     publish("temperature/C", buffer, true);
     snprintf(buffer, 6, "%3.1f", 1.8 * temperature + 32);
     publish("temperature/F", buffer, true);
     snprintf(buffer, 4, "%3.0f", humidity);
     publish("humidity/pct", buffer, true);
-    snprintf(buffer, 7, "%6.0f", pressure);
-    publish("pressure/Pa", buffer, true);
-    snprintf(buffer, 8, "%4.2f", pressure / 100);    
-    publish("pressure/mbar", buffer, true);
-    snprintf(buffer, 6, "%2.2f", pressure / 3386.39);
-    publish("pressure/inHg", buffer, true);
-  }
-}
-
-void readBMP280(int address) {
-  if (!bmp.begin(address)) {
-    Serial.print("No BMP280 found at I2C address: ");
-    Serial.println(address, HEX);
-  }
-  else {
-    char buffer[8];  // Temporary storage for floating point to string conversions.
-
-    float temperature = bmp.readTemperature();
-    float pressure = bmp.readPressure();
-
-    // Readings come the sensor as floating point values and must be converted to strings for publishing.
-    snprintf(buffer, 6, "%3.1f", temperature);
-    publish("temperature/C", buffer, true);
-    snprintf(buffer, 6, "%3.1f", 1.8 * temperature + 32);
-    publish("temperature/F", buffer, true);
     snprintf(buffer, 7, "%6.0f", pressure);
     publish("pressure/Pa", buffer, true);
     snprintf(buffer, 8, "%4.2f", pressure / 100);    
@@ -244,8 +228,6 @@ void setup() {
   Serial.println();
   free(fileBuffer);
   digitalWrite(LED_BUILTIN, HIGH);  // LED off to indicate startup is complete.
-
-//  SPIFFS.remove(CONFIG_FILE);
 }
 
 void loop() {
@@ -257,11 +239,15 @@ void loop() {
   mqttConnect();
   publish("", "ping", false);  // Send a ping message to the device topic (no /subtopic) and flag it as not retained.
 
-  // This is where you would take sensor readings and publish the data. Unlike the ping example, you'll probably want to set the retained flag.
-  // There is no harm in reading a non-existent sensor, other than the error message on serial output, but you might want to remove the unused one.
-  readBME280(0x76);
-  readBMP280(0x76);
+  // This is where you would call any functions you create to read and publish sensor data.
+  readBME280(I2C_ADDRESS);
 
-  unsigned long duration = millis() - startTime;  // Calculate the length of time it took for update and publish.
-  delay(atoi(deviceConfig.read("Update Interval")) * 60e3 - duration);  // Update Interval is in minutes. 60e3 is milliseconds in a minute.
+  unsigned long duration = millis() - startTime;  // Calculate the length of time (in milliseconds) it took for update and publish.
+  if (WAKE_WIRE) {
+    Serial.println();  // Makes serial output cleaner when waking up.
+    ESP.deepSleep(atoi(deviceConfig.read("Update Interval")) * 60e6 - duration * 1000);  // Update Interval is in minutes, deepSleep expects microseconds.  
+  }
+  else {
+    delay(atoi(deviceConfig.read("Update Interval")) * 60e3 - duration);  // Delay expects milliseconds.
+  }
 }
