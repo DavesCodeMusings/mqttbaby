@@ -3,7 +3,7 @@
 ConfigBaby::ConfigBaby() {}
 
 int ConfigBaby::begin(const char *keysCSV) {
-  char keysBuffer[strlen(keysCSV)];  // strtok() is destructive to the string, so a temporary buffer is used.
+  char keysBuffer[strlen(keysCSV) + 1];  // strtok() is destructive to the string, so a temporary buffer is used.
   strcpy(keysBuffer, keysCSV);
   char *tokenPointer;
   int kvIndex = 0;
@@ -24,9 +24,9 @@ int ConfigBaby::begin(const char *keysCSV) {
 }
 
 int ConfigBaby::begin(const char *keysCSV, const char *valuesCSV) {
-  char keysBuffer[strlen(keysCSV)];  // strtok() is destructive to the string, so a temporary buffer is used.
+  char keysBuffer[strlen(keysCSV) + 1];  // strtok() is destructive to the string, so a temporary buffer is used.
   strcpy(keysBuffer, keysCSV);
-  char valuesBuffer[strlen(valuesCSV)];
+  char valuesBuffer[strlen(valuesCSV) + 1];
   strcpy(valuesBuffer, valuesCSV);
   char *tokenPointer;
   int kvIndex = 0;
