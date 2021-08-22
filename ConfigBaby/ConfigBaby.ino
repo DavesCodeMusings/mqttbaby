@@ -55,7 +55,11 @@ void setup() {
   deviceConfig.deserialize(fileContents);
   deviceConfig.serialize(fileBuffer);
   Serial.println(fileBuffer);
-    
+
+  deviceConfig.begin("Device ID,WiFi SSID,WiFi Password,MQTT IP Address,MQTT Port,MQTT Username,MQTT Password,Update Interval,Altitude", "mqttbaby,Collins,Sussudio,192.168.1.100,1883,admin,password,15,300");
+  deviceConfig.serialize(fileBuffer);
+  Serial.println(fileBuffer);
+  
   // You can also use an interactive menu to enter values.
   Serial.println("Users can also input and update values using a menu...");
 }

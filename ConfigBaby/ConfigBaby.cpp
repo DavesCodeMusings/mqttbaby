@@ -3,60 +3,53 @@
 ConfigBaby::ConfigBaby() {}
 
 int ConfigBaby::begin(const char *keysCSV) {
-  char keysBuffer[strlen(keysCSV) + 1];  // strtok() is destructive to the string, so a temporary buffer is used.
-  strcpy(keysBuffer, keysCSV);
-  char *tokenPointer;
-  int kvIndex = 0;
-
-  tokenPointer = strtok(keysBuffer, ",");
-  while (tokenPointer != NULL) {
-    strncpy(keys[kvIndex], tokenPointer, MAX_KEY_LEN - 1);
-    values[kvIndex][0] = NULL;  // Value string is empty.
-    kvIndex++;
-    if (kvIndex > MAX_PAIRS) {
-      break;
-    }
-    tokenPointer = strtok(NULL, ",");
-  }
-  totalPairs = kvIndex;
-
-  return kvIndex;
+  return setKeys(keysCSV);
 }
 
 int ConfigBaby::begin(const char *keysCSV, const char *valuesCSV) {
+  int totalKeys = setKeys(keysCSV);
+  setValues(valuesCSV);
+  return totalKeys;
+}
+    
+int ConfigBaby::setKeys(const char *keysCSV) {
   char keysBuffer[strlen(keysCSV) + 1];  // strtok() is destructive to the string, so a temporary buffer is used.
   strcpy(keysBuffer, keysCSV);
-  char valuesBuffer[strlen(valuesCSV) + 1];
-  strcpy(valuesBuffer, valuesCSV);
   char *tokenPointer;
-  int kvIndex = 0;
+  int keyIndex = 0;
 
-  // Keys.
   tokenPointer = strtok(keysBuffer, ",");
   while (tokenPointer != NULL) {
-    strncpy(keys[kvIndex], tokenPointer, MAX_KEY_LEN - 1);
-    values[kvIndex][0] = NULL;  // Set as empty in case not all values are filled.
-    kvIndex++;
-    if (kvIndex > MAX_PAIRS) {
+    strncpy(keys[keyIndex], tokenPointer, MAX_KEY_LEN - 1);
+    values[keyIndex][0] = NULL;  // Value string is intialized as empty.
+    keyIndex++;
+    if (keyIndex > MAX_PAIRS) {
       break;
     }
     tokenPointer = strtok(NULL, ",");
   }
-  totalPairs = kvIndex;
+  totalPairs = keyIndex;
 
-  // Default values.
-  kvIndex = 0;
+  return keyIndex;
+}
+
+int ConfigBaby::setValues(const char *valuesCSV) {
+  char valuesBuffer[strlen(valuesCSV) + 1]; // strtok() is destructive to the string, so a temporary buffer is used.
+  strcpy(valuesBuffer, valuesCSV);
+  char *tokenPointer;
+  int valueIndex = 0;
+
   tokenPointer = strtok(valuesBuffer, ",");
   while (tokenPointer != NULL) {
-    strncpy(values[kvIndex], tokenPointer, MAX_VALUE_LEN - 1);
-    kvIndex++;
-    if (kvIndex > MAX_PAIRS) {
+    strncpy(values[valueIndex], tokenPointer, MAX_VALUE_LEN - 1);
+    valueIndex++;
+    if (valueIndex > MAX_PAIRS) {
       break;
     }
     tokenPointer = strtok(NULL, ",");
   }
 
-  return totalPairs;  // Return the number of key-value pairs stored, regardless if the number of values matched. 
+  return valueIndex;
 }
 
 void ConfigBaby::writeValue(const int kvIndex, const char *value) {
@@ -138,7 +131,6 @@ void ConfigBaby::readln() {
 bool ConfigBaby::input() {
   bool done = false;
 
-  Serial.setTimeout(60000); // 60 seconds expressed in milliseconds.
   Serial.println();
   Serial.println("Device Configuration Menu");
 
@@ -156,10 +148,10 @@ bool ConfigBaby::input() {
     }
     Serial.println("(0) Save and exit.");
 
-    Serial.print("Parameter? ");
+    Serial.print("?");
     while (!Serial.available());
     int choice = Serial.read() - '0';  // Convert ASCII character to a number by subracting ASCII value of zero.
-      
+
     if (choice == 0) {
       Serial.println(choice);
       done = true;
@@ -167,9 +159,6 @@ bool ConfigBaby::input() {
     else {
       if (choice < 0 || choice > totalPairs) {
         Serial.println("\007");  // ASCII BEL (Should beep or flash the screen depending on terminal emulator.) 
-        Serial.print("Select a number between 0 and ");
-        Serial.print(totalPairs);
-        Serial.println(".\n");
       }
       else {
         Serial.println(choice);
@@ -184,6 +173,25 @@ bool ConfigBaby::input() {
   }
 
   return done;
+}
+
+int ConfigBaby::select(char *value) {
+  for(int kvIndex = 0; kvIndex < totalPairs; kvIndex++) {
+    Serial.print("(");
+    Serial.print(kvIndex + 1);  // C starts at 0, humans start at 1.
+    Serial.print(") ");
+    Serial.println(keys[kvIndex]);
+  }
+  Serial.print("?");
+
+  int choice = 0;
+  while (choice < 1 || choice > totalPairs) {
+    while (!Serial.available());
+    choice = Serial.read() - '0';  // Convert ASCII character to a number by subracting ASCII value of zero.
+  }
+  strncpy(value, values[choice - 1], MAX_VALUE_LEN);  // values[] is zero indexed, choice starts with 1.
+  
+  return choice;
 }
 
 int ConfigBaby::serialize(char *buffer) {
