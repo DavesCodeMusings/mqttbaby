@@ -10,7 +10,7 @@
 
 #include <Arduino.h>
 
-#define MAX_PAIRS 9  // Menu selections are single digits 1-9, so think carefully before changing.
+#define MAX_PAIRS 10  // Menu selections are single digits 1-9, so think carefully before changing.
 #define MAX_KEY_LEN 16  // 15 chars + 1 null terminator.
 #define MAX_VALUE_LEN 16  // Just big enough for an IP address (e.g. 192.168.100.200) and a null terminator.
 #define MAX_CONFIG_DESERIALIZE (MAX_PAIRS * (MAX_KEY_LEN + MAX_VALUE_LEN + 1) + 1)  // For file buffer.
@@ -40,9 +40,21 @@ class ConfigBaby {
   public:
     ConfigBaby();
 
-    /** Initialize the associative array with key names and optional default values.
+    /** Initialize the associative array with key names.
+        @param keysCSV Pointer to a comma-separated value string of key names in preferred order. */
+    int setKeys(const char *keysCSV);
+
+    /** Initialize the values associated with a set of key names. Used to provide defaults.
+        @param valuesCSV Pointer to a comma-separated value string of values, presented in the same order as the keys initializer. */
+    int setValues(const char *valuesCSV);
+
+    /** Initialize using the standard Arduino function begin(). Essentially just another way of calling setKeys().
         @param keysCSV Pointer to a comma-separated value string of key names in preferred order. */
     int begin(const char *keysCSV);
+
+    /** Initialize using the standard Arduino function begin(). Essentially just another way of calling setKeys() and setValues().
+        @param keysCSV Pointer to a comma-separated value string of key names in preferred order.
+        @param valuesCSV Pointer to a comma-separated value string of values, presented in the same order as the keys initializer.*/
     int begin(const char *keysCSV, const char *valuesCSV);
     
     /** Return the string value associated with key.
@@ -57,6 +69,9 @@ class ConfigBaby {
     /** Gather configuration values using an interactive menu. */
     bool input();
 
+    /** Present the list of keys preceeded by numerical indicators and wait for the user to choose one. */
+    int select(char *value);
+    
     /** Write the configuration as a serias of 'Key=Value\r\n' lines in buffer so it can be saved to a text file. */
     int serialize(char *buffer);
 
